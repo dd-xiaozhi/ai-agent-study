@@ -2,7 +2,6 @@
 """
 三国狼人杀 - 基于AgentScope的中文版狼人杀游戏 (Refactored)
 融合三国演义角色和传统狼人杀玩法
-使用 SiliconFlow DeepSeek 模型
 """
 import asyncio
 import os
@@ -142,41 +141,17 @@ class ChinesePrompts:
     @staticmethod
     def get_role_prompt(role: str, character: str) -> str:
         """获取角色提示词"""
-        base_prompt = f"""【系统指令】
-你正在参与一个名为“三国狼人杀”的角色扮演游戏。
-当前你的身份是：{character} ({role})。
+        base_prompt = f"""你是{character}，在这场三国狼人杀游戏中扮演{role}。
 
-【绝对禁令】
-1. 禁止输出任何与游戏无关的内容（如代码、教程、翻译、项目介绍等）。
-2. 禁止跳出角色设定。
-3. 禁止输出 Markdown 代码块标记（如 ```json）。
-
-【输出要求】
-必须且仅能输出一个标准的 JSON 字符串，格式如下：
+请严格按照以下JSON格式回复，不要添加任何其他文字：
 {{
     "reach_agreement": true/false,
     "confidence_level": 1-10的数字,
-    "key_evidence": "以{character}的口吻描述你的观点"
+    "key_evidence": "你的证据或观点"
 }}
-
-【示例】
-正确输出：
-{{
-    "reach_agreement": false,
-    "confidence_level": 8,
-    "key_evidence": "吾观那厮贼眉鼠眼，定非善类！"
-}}
-
-错误输出：
-```json
-{{
-    ...
-}}
-```
 
 角色特点：
 """
-
         
         if role == "狼人":
             return base_prompt + f"""
@@ -357,37 +332,6 @@ import re
 # 4. 工具函数 (from utils_cn.py)
 # ==========================================
 
-def sanitize_msg(msg: Msg, agent_name: str) -> Msg:
-    """清洗消息内容，去除幻觉和非法格式"""
-    if not msg or not msg.content:
-        print(f"WARNING: Empty msg from {agent_name}")
-        msg.content = '{"reach_agreement": false, "confidence_level": 5, "key_evidence": "（沉思中...）"}'
-        return msg
-
-    content = str(msg.content)
-    
-    # 1. 检查非法关键词 (代码、链接等)
-    blacklist = ["#include", "import ", "class ", "def ", "http", "github", "```java", "```python", "```c"]
-    for word in blacklist:
-        if word in content.lower():
-            print(f"WARNING: Invalid keyword '{word}' found in {agent_name}'s msg: {content[:50]}...")
-            msg.content = '{"reach_agreement": false, "confidence_level": 5, "key_evidence": "（我需要再思考一下...）"}'
-            return msg
-
-    # 2. 尝试提取 JSON
-    # 移除 Markdown 代码块标记
-    import re
-    match = re.search(r"```json\s*(.*?)\s*```", content, re.DOTALL)
-    if match:
-        content = match.group(1)
-    else:
-        match = re.search(r"```\s*(.*?)\s*```", content, re.DOTALL)
-        if match:
-            content = match.group(1)
-            
-    msg.content = content.strip()
-    return msg
-
 def extract_json_from_text(text: str | list | Any) -> Dict[str, Any]:
     """从文本中提取JSON"""
     if isinstance(text, list):
@@ -504,11 +448,10 @@ def format_player_list_str(players: List[str]) -> str:
 class GameModerator(AgentBase):
     """中文版游戏主持人"""
     
-    def __init__(self, notify_func=None) -> None:
+    def __init__(self) -> None:
         super().__init__()
         self.name = "游戏主持人"
         self.game_log: List[str] = []
-        self.notify_func = notify_func
     
     async def announce(self, content: str) -> Msg:
         """发布游戏公告"""
@@ -518,14 +461,7 @@ class GameModerator(AgentBase):
             role="system"
         )
         self.game_log.append(content)
-        # await self.print(msg) # Disable print to avoid double printing if notify handles it, or keep it.
-        # Let's keep print for terminal usage, but maybe the server will capture stdout?
-        # Better to keep print for now.
-        print(f"\n[{self.name}] {content}")
-        
-        if self.notify_func:
-            await self.notify_func(msg)
-            
+        await self.print(msg)
         return msg
     
     async def night_announcement(self, round_num: int) -> Msg:
@@ -563,11 +499,10 @@ class GameModerator(AgentBase):
 class ThreeKingdomsWerewolfGame:
     """三国狼人杀游戏主类"""
     
-    def __init__(self, notify_func=None):
+    def __init__(self):
         self.players: Dict[str, ReActAgent] = {}
         self.roles: Dict[str, str] = {}
-        self.notify_func = notify_func
-        self.moderator = GameModerator(notify_func=notify_func)
+        self.moderator = GameModerator()
         self.alive_players: List[ReActAgent] = []
         self.werewolves: List[ReActAgent] = []
         self.villagers: List[ReActAgent] = []
@@ -599,11 +534,13 @@ class ThreeKingdomsWerewolfGame:
             name=name,
             sys_prompt=ChinesePrompts.get_role_prompt(role, character),
             model=OpenAIChatModel(
+                config_name="deepseek_config",
                 model_name=model_name,
                 api_key=api_key,
-                client_args={
+                client_kwargs={
                     "base_url": base_url
                 },
+                # enable_thinking=True # OpenAIChatModel might not support this directly or it's handled differently
             ),
             formatter=OpenAIChatFormatter(),
         )
@@ -656,9 +593,6 @@ class ThreeKingdomsWerewolfGame:
     
     async def werewolf_phase(self, round_num: int):
         """狼人阶段"""
-        if self.notify_func:
-            await self.notify_func({"type": "phase", "content": "狼人阶段", "task": "狼人请睁眼，选择今晚要击杀的目标"})
-            
         if not self.werewolves:
             return None
             
@@ -667,7 +601,7 @@ class ThreeKingdomsWerewolfGame:
         # 狼人讨论
         async with MsgHub(
             self.werewolves,
-            enable_auto_broadcast=False, # Disable auto broadcast to filter msgs
+            enable_auto_broadcast=True,
             announcement=await self.moderator.announce(
                 f"狼人们，请讨论今晚的击杀目标。存活玩家：{format_player_list(self.alive_players)}"
             ),
@@ -675,35 +609,8 @@ class ThreeKingdomsWerewolfGame:
             # 讨论阶段
             for _ in range(MAX_DISCUSSION_ROUND):
                 for wolf in self.werewolves:
-                    # Debug: Check memory before generation
-                    print(f"Checking memory for {wolf.name}")
-                    if hasattr(wolf, 'memory') and wolf.memory:
-                        # get_memory is async if using certain backends, but usually sync for InMemory.
-                        # However, user report says it is a coroutine.
-                        # Let's try to inspect if it is awaitable.
-                        mems = wolf.memory.get_memory()
-                        if asyncio.iscoroutine(mems):
-                            mems = await mems
-                        
-                        if mems:
-                            for m in mems:
-                               if m.content is None or (isinstance(m.content, str) and ("```" in m.content or "http" in m.content or "github" in m.content.lower())):
-                                   print(f"WARNING: Found invalid content msg in {wolf.name}'s memory: {m}")
-                                   m.content = "" # HOTFIX: Clear invalid memory
-                    
                     # 不使用 structured_model 以避免 API 兼容性问题
-                    # Add hint prompt - MUST be a Msg object, not string!
-                    hint_msg = Msg(name="System", content="请基于当前局势进行发言，必须返回JSON格式。", role="system")
-                    msg = await wolf(hint_msg)
-                    
-                    # Sanitize
-                    msg = sanitize_msg(msg, wolf.name)
-                    
-                    # Manual broadcast
-                    werewolves_hub.broadcast(msg)
-
-                    if self.notify_func and msg:
-                        await self.notify_func(msg)
+                    await wolf()
             
             # 投票击杀
             werewolves_hub.set_auto_broadcast(False)
@@ -713,12 +620,6 @@ class ThreeKingdomsWerewolfGame:
                 # structured_model=WerewolfKillModelCN, # Disable
                 enable_gather=False,
             )
-            
-            # 广播投票消息
-            if self.notify_func:
-                for msg in kill_votes:
-                    if msg:
-                        await self.notify_func(msg)
             
             # 统计投票
             votes = {}
@@ -738,9 +639,6 @@ class ThreeKingdomsWerewolfGame:
     
     async def seer_phase(self):
         """预言家阶段"""
-        if self.notify_func:
-            await self.notify_func({"type": "phase", "content": "预言家阶段", "task": "预言家请睁眼，选择要查验的玩家"})
-            
         if not self.seer:
             return
             
@@ -748,8 +646,6 @@ class ThreeKingdomsWerewolfGame:
         await self.moderator.announce("🔮 预言家请睁眼，选择要查验的玩家...")
         
         check_result = await seer_agent()
-        if self.notify_func and check_result:
-            await self.notify_func(check_result)
 
         # 检查返回结果是否有效
         if check_result and check_result.content:
@@ -771,9 +667,6 @@ class ThreeKingdomsWerewolfGame:
     
     async def witch_phase(self, killed_player: str):
         """女巫阶段"""
-        if self.notify_func:
-            await self.notify_func({"type": "phase", "content": "女巫阶段", "task": "女巫请睁眼，决定是否使用药剂"})
-            
         if not self.witch:
             return killed_player, None
             
@@ -786,8 +679,6 @@ class ThreeKingdomsWerewolfGame:
         
         # 女巫行动
         witch_action = await witch_agent()
-        if self.notify_func and witch_action:
-            await self.notify_func(witch_action)
 
         saved_player = None
         poisoned_player = None
@@ -819,9 +710,6 @@ class ThreeKingdomsWerewolfGame:
     
     async def hunter_phase(self, shot_by_hunter: str):
         """猎人阶段"""
-        if self.notify_func:
-            await self.notify_func({"type": "phase", "content": "猎人阶段", "task": "猎人发动技能"})
-            
         if not self.hunter:
             return None
             
@@ -830,8 +718,6 @@ class ThreeKingdomsWerewolfGame:
             await self.moderator.announce("🏹 猎人发动技能，可以带走一名玩家...")
             
             hunter_action = await hunter_agent()
-            if self.notify_func and hunter_action:
-                await self.notify_func(hunter_action)
 
             # 检查返回结果是否有效
             data = {}
@@ -868,46 +754,18 @@ class ThreeKingdomsWerewolfGame:
     
     async def day_phase(self, round_num: int):
         """白天阶段"""
-        if self.notify_func:
-            await self.notify_func({"type": "phase", "content": f"第{round_num}天 白天", "task": "自由讨论与投票"})
-            
         await self.moderator.day_announcement(round_num)
         
         # 讨论阶段
         async with MsgHub(
             self.alive_players,
-            enable_auto_broadcast=False, # Disable auto broadcast to filter msgs
+            enable_auto_broadcast=True,
             announcement=await self.moderator.announce(
                 f"现在开始自由讨论。存活玩家：{format_player_list(self.alive_players)}"
             ),
         ) as all_hub:
             # 每人发言一轮
-            # await sequential_pipeline(self.alive_players)
-            for player in self.alive_players:
-                # Debug: Check memory before generation
-                if hasattr(player, 'memory') and player.memory:
-                     mems = player.memory.get_memory()
-                     if asyncio.iscoroutine(mems):
-                         mems = await mems
-                     
-                     if mems:
-                         for m in mems:
-                             if m.content is None or (isinstance(m.content, str) and ("```" in m.content or "http" in m.content or "github" in m.content.lower())):
-                                 print(f"WARNING: Found invalid content msg in {player.name}'s memory: {m}")
-                                 m.content = "" # HOTFIX: Clear invalid memory
-
-                # Add hint prompt - MUST be a Msg object, not string!
-                hint_msg = Msg(name="System", content="请基于当前局势进行发言，必须返回JSON格式。", role="system")
-                msg = await player(hint_msg)
-                
-                # Sanitize
-                msg = sanitize_msg(msg, player.name)
-                
-                # Manual broadcast
-                all_hub.broadcast(msg)
-
-                if self.notify_func and msg:
-                    await self.notify_func(msg)
+            await sequential_pipeline(self.alive_players)
             
             # 投票阶段
             all_hub.set_auto_broadcast(False)
@@ -917,12 +775,6 @@ class ThreeKingdomsWerewolfGame:
                 # structured_model=get_vote_model_cn(self.alive_players), # Disable
                 enable_gather=False,
             )
-            
-            # 广播投票消息
-            if self.notify_func:
-                for msg in vote_msgs:
-                    if msg:
-                        await self.notify_func(msg)
             
             # 统计投票
             votes = {}

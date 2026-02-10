@@ -23,7 +23,7 @@
 在这个游戏中，我们将创建 6-9 个 AI 演员。他们既是**三国人物**（刘备、曹操等，决定性格），又是**狼人杀角色**（狼人、预言家等，决定功能）。
 
 **文件结构：**
-*   `refactored_game.py`: 我们的主程序，包含了所有的逻辑。
+*   `main.py`: 我们的主程序，包含了所有的逻辑。
 
 ---
 
@@ -156,7 +156,7 @@ graph TD
 
 ## 5. 关键代码实战分析
 
-让我们深入到 `refactored_game.py` 的第 594 行 `werewolf_phase`（狼人阶段），看看它是如何运作的：
+让我们深入到 `main.py` 的第 594 行 `werewolf_phase`（狼人阶段），看看它是如何运作的：
 
 ```python
 async def werewolf_phase(self, round_num: int):
@@ -199,4 +199,4 @@ async def werewolf_phase(self, round_num: int):
 2.  **MsgHub**: 控制谁能听到谁，实现“私聊”和“公聊”。
 3.  **Pipeline**: 控制流程，是轮流来（讨论）还是大家一起来（投票）。
 
-现在，你已经准备好运行这个游戏了！设置好你的 API Key，运行 `python refactored_game.py`，看着刘备和曹操互相飙戏吧！
+现在，你已经准备好运行这个游戏了！设置好你的 API Key，运行 `python main.py`，看着刘备和曹操互相飙戏吧！
