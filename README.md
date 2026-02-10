@@ -52,12 +52,19 @@ ai-agent/
 - 用正则解析 Thought → Action → Observation 循环
 
 ```mermaid
+%%{init: {'theme':'dark', 'themeVariables': { 'primaryColor':'#4A90E2','primaryTextColor':'#fff','primaryBorderColor':'#2E5C8A','lineColor':'#64B5F6','secondaryColor':'#66BB6A','tertiaryColor':'#FFA726'}}}%%
 flowchart LR
-    A["用户输入"] --> B["Thought\n思考"]
-    B --> C["Action\n调用工具"]
-    C --> D["Observation\n观察结果"]
+    A["用户输入"] --> B["Thought<br/>思考"]
+    B --> C["Action<br/>调用工具"]
+    C --> D["Observation<br/>观察结果"]
     D --> B
-    D --> E["Finish\n输出答案"]
+    D --> E["Finish<br/>输出答案"]
+    
+    style A fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
+    style B fill:#66BB6A,stroke:#4CAF50,stroke-width:2px,color:#fff
+    style C fill:#FFA726,stroke:#F57C00,stroke-width:2px,color:#fff
+    style D fill:#AB47BC,stroke:#7B1FA2,stroke-width:2px,color:#fff
+    style E fill:#EF5350,stroke:#C62828,stroke-width:2px,color:#fff
 ```
 
 ### 二、经典 Agent 范式手写实现（ConstructionOfClassicAgentParadigms）
@@ -73,22 +80,36 @@ flowchart LR
 #### Plan-and-Solve 流程
 
 ```mermaid
+%%{init: {'theme':'dark', 'themeVariables': { 'primaryColor':'#5C6BC0','primaryTextColor':'#fff','primaryBorderColor':'#3949AB','lineColor':'#7986CB','secondaryColor':'#26A69A','tertiaryColor':'#FF7043'}}}%%
 flowchart TD
-    A["用户任务"] --> B["Planner\n拆解为步骤列表"]
-    B --> C["Executor\n按步骤逐一执行"]
+    A["用户任务"] --> B["Planner<br/>拆解为步骤列表"]
+    B --> C["Executor<br/>按步骤逐一执行"]
     C --> D["汇总结果"]
+    
+    style A fill:#5C6BC0,stroke:#3949AB,stroke-width:2px,color:#fff
+    style B fill:#26A69A,stroke:#00897B,stroke-width:2px,color:#fff
+    style C fill:#FF7043,stroke:#E64A19,stroke-width:2px,color:#fff
+    style D fill:#66BB6A,stroke:#43A047,stroke-width:2px,color:#fff
 ```
 
 #### Reflection 流程
 
 ```mermaid
+%%{init: {'theme':'dark', 'themeVariables': { 'primaryColor':'#7E57C2','primaryTextColor':'#fff','primaryBorderColor':'#5E35B1','lineColor':'#9575CD','secondaryColor':'#29B6F6','tertiaryColor':'#FFA726'}}}%%
 flowchart TD
     A["用户任务"] --> B["初始代码生成"]
-    B --> C["反思阶段\n代码审查"]
-    C --> D["改进阶段\n优化代码"]
-    D --> E{"达到最大\n迭代次数?"}
+    B --> C["反思阶段<br/>代码审查"]
+    C --> D["改进阶段<br/>优化代码"]
+    D --> E{"达到最大<br/>迭代次数?"}
     E -- 否 --> C
     E -- 是 --> F["输出最终代码"]
+    
+    style A fill:#7E57C2,stroke:#5E35B1,stroke-width:2px,color:#fff
+    style B fill:#29B6F6,stroke:#0288D1,stroke-width:2px,color:#fff
+    style C fill:#FFA726,stroke:#F57C00,stroke-width:2px,color:#fff
+    style D fill:#66BB6A,stroke:#43A047,stroke-width:2px,color:#fff
+    style E fill:#EC407A,stroke:#C2185B,stroke-width:2px,color:#fff
+    style F fill:#26A69A,stroke:#00897B,stroke-width:2px,color:#fff
 ```
 
 ### 三、主流框架对比实战（framework-study）
@@ -101,24 +122,44 @@ flowchart TD
 | **AgentScope** | 三国狼人杀游戏 | 多角色博弈，昼夜轮替，投票与讨论机制 |
 
 ```mermaid
+%%{init: {'theme':'dark', 'themeVariables': { 'primaryColor':'#42A5F5','primaryTextColor':'#fff','primaryBorderColor':'#1976D2','lineColor':'#64B5F6'}}}%%
 flowchart TB
-    subgraph AutoGen
+    subgraph AutoGen["🤖 AutoGen - 多 Agent 协作"]
         PM["产品经理"] <--> ENG["工程师"]
         ENG <--> CR["代码审查员"]
         CR <--> UP["用户代理"]
     end
-    subgraph CAMEL
+    
+    subgraph CAMEL["🎭 CAMEL - 角色扮演"]
         R1["心理学家"] <--> R2["作家"]
     end
-    subgraph LangGraph
+    
+    subgraph LangGraph["🔄 LangGraph - 状态图"]
         AG["Agent 节点"] -->|调用工具| TN["Tool 节点"]
         TN -->|返回结果| AG
     end
-    subgraph AgentScope
+    
+    subgraph AgentScope["🎮 AgentScope - 游戏"]
         WW["狼人"] ~~~ SE["预言家"]
         SE ~~~ WI["女巫"]
         WI ~~~ VI["村民"]
     end
+    
+    style PM fill:#42A5F5,stroke:#1976D2,stroke-width:2px,color:#fff
+    style ENG fill:#66BB6A,stroke:#43A047,stroke-width:2px,color:#fff
+    style CR fill:#FFA726,stroke:#F57C00,stroke-width:2px,color:#fff
+    style UP fill:#AB47BC,stroke:#7B1FA2,stroke-width:2px,color:#fff
+    
+    style R1 fill:#EC407A,stroke:#C2185B,stroke-width:2px,color:#fff
+    style R2 fill:#26A69A,stroke:#00897B,stroke-width:2px,color:#fff
+    
+    style AG fill:#5C6BC0,stroke:#3949AB,stroke-width:2px,color:#fff
+    style TN fill:#FF7043,stroke:#E64A19,stroke-width:2px,color:#fff
+    
+    style WW fill:#EF5350,stroke:#C62828,stroke-width:2px,color:#fff
+    style SE fill:#29B6F6,stroke:#0288D1,stroke-width:2px,color:#fff
+    style WI fill:#AB47BC,stroke:#7B1FA2,stroke-width:2px,color:#fff
+    style VI fill:#66BB6A,stroke:#43A047,stroke-width:2px,color:#fff
 ```
 
 ## 快速开始
@@ -181,9 +222,10 @@ python framework-study/AgentScopeDemo/main.py
 ## 学习路线
 
 ```mermaid
+%%{init: {'theme':'dark', 'themeVariables': { 'primaryColor':'#4CAF50','primaryTextColor':'#fff','primaryBorderColor':'#388E3C','lineColor':'#66BB6A'}}}%%
 flowchart LR
-    A["1. 快速入门\nQuickStart"] --> B["2. 经典范式\n手写实现"]
-    B --> C["3. 框架对比\n实战应用"]
+    A["🚀 1. 快速入门<br/>QuickStart"] --> B["⚙️ 2. 经典范式<br/>手写实现"]
+    B --> C["🎯 3. 框架对比<br/>实战应用"]
     
     B --- B1["ReAct"]
     B --- B2["Plan-and-Solve"]
@@ -193,6 +235,19 @@ flowchart LR
     C --- C2["CAMEL"]
     C --- C3["LangGraph"]
     C --- C4["AgentScope"]
+    
+    style A fill:#4CAF50,stroke:#388E3C,stroke-width:3px,color:#fff
+    style B fill:#42A5F5,stroke:#1976D2,stroke-width:3px,color:#fff
+    style C fill:#FF7043,stroke:#E64A19,stroke-width:3px,color:#fff
+    
+    style B1 fill:#26A69A,stroke:#00897B,stroke-width:2px,color:#fff
+    style B2 fill:#66BB6A,stroke:#43A047,stroke-width:2px,color:#fff
+    style B3 fill:#AB47BC,stroke:#7B1FA2,stroke-width:2px,color:#fff
+    
+    style C1 fill:#FFA726,stroke:#F57C00,stroke-width:2px,color:#fff
+    style C2 fill:#EC407A,stroke:#C2185B,stroke-width:2px,color:#fff
+    style C3 fill:#5C6BC0,stroke:#3949AB,stroke-width:2px,color:#fff
+    style C4 fill:#29B6F6,stroke:#0288D1,stroke-width:2px,color:#fff
 ```
 
 建议按 **快速入门 → 经典范式 → 框架实战** 的顺序学习，先理解底层原理，再用框架提效。
