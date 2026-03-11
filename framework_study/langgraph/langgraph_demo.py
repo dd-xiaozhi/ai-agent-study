@@ -11,9 +11,9 @@ from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
 
 # 尝试加载环境变量
-# 优先加载当前目录的 .env，如果没有，尝试加载 AutoGen 目录下的 .env (假设那里配置好了)
+# 优先加载当前目录的 .env，如果没有，尝试加载 autogen 目录下的 .env (假设那里配置好了)
 current_dir = os.path.dirname(os.path.abspath(__file__))
-autogen_env = os.path.join(current_dir, "..", "AutoGen", ".env")
+autogen_env = os.path.join(current_dir, "..", "autogen", ".env")
 
 if os.path.exists("(.env"):
     load_dotenv()
@@ -24,7 +24,7 @@ else:
     load_dotenv()
 
 # 配置模型
-# 使用与 AutoGen 示例相同的 DeepSeek 或 OpenAI 配置
+# 使用与 autogen 示例相同的 DeepSeek 或 OpenAI 配置
 API_KEY = os.getenv("OPENAI_API_KEY")
 BASE_URL = os.getenv("OPENAI_API_BASE_URL", "https://api.openai.com/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "deepseek-ai/DeepSeek-V3.2") 

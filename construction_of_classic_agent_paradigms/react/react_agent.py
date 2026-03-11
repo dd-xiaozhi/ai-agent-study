@@ -1,5 +1,5 @@
-from SearchTool import search
-from ToolExecutor import ToolExecutor
+from search_tool import search
+from tool_executor import ToolExecutor
 
 
 REACT_PROMPT_TEMPLATE = """

@@ -4,8 +4,8 @@ import os
 # 添加父目录到路径
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from LLMClient import LLMClient
-from Memory import Memory
+from llm_client import LLMClient
+from memory import Memory
 
 INITIAL_PROMPT_TEMPLATE = """
     你是一位资深的 Python 专家。请根据以下要求，编写一个 Python 函数。

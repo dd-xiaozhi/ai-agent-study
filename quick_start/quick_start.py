@@ -9,6 +9,7 @@ class OpenAICompatibleClient:
     """
     OpenAI兼容客户端, 用于与OpenAI API兼容
     """
+
     def __init__(self, model: str, api_key: str, base_url: str):
         self.model = model
         self.client = OpenAI(api_key=api_key, base_url=base_url)
@@ -25,19 +26,17 @@ class OpenAICompatibleClient:
         try:
             messages = [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt}
+                {"role": "user", "content": prompt},
             ]
             response = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                stream=False
+                model=self.model, messages=messages, stream=False
             )
 
             answer = response.choices[0].message.content
             print(f"Generated answer: \n{answer}")
             return answer
         except Exception as e:
-            return f'错误: 调用OpenAI API失败: {e}'
+            return f"错误: 调用OpenAI API失败: {e}"
 
 
 def get_weather(city: str) -> str:
@@ -57,16 +56,16 @@ def get_weather(city: str) -> str:
         data = response.json()
 
         # 解析数据
-        current_condition = data['current_condition'][0]
-        weather_desc = current_condition['weatherDesc'][0]['value']
-        temp_c = current_condition['temp_C']
+        current_condition = data["current_condition"][0]
+        weather_desc = current_condition["weatherDesc"][0]["value"]
+        temp_c = current_condition["temp_C"]
 
-        return f'{city}当前天气：{weather_desc}, 气温：{temp_c} 摄氏度'
+        return f"{city}当前天气：{weather_desc}, 气温：{temp_c} 摄氏度"
     except requests.exceptions.RequestException as e:
         return f"错误：查询天气遇到网络问题: {e}"
 
     except (KeyError, IndexError) as e:
-        return f'错误：解析天气数据失败：{e}'
+        return f"错误：解析天气数据失败：{e}"
 
 
 def get_attraction(city: str, weather: str) -> str:
@@ -79,12 +78,12 @@ def get_attraction(city: str, weather: str) -> str:
             str: 旅游景点信息
     """
     # 初始化客户端
-    tavily = TavilyClient(api_key=os.getenv('TAVILY_API_KEY'))
+    tavily = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 
     query = f"'{city}' 在 '{weather}' 天气下值得去的旅游景点以及推荐理由"
 
     try:
-        response = tavily.search(query=query, search_depth='basic', include_answer=True)
+        response = tavily.search(query=query, search_depth="basic", include_answer=True)
 
         if response.get("answer"):
             return response["answer"]
@@ -102,10 +101,7 @@ def get_attraction(city: str, weather: str) -> str:
         return f"错误：执行搜索时遇到网络问题: {e}"
 
 
-available_tools = {
-    "get_weather": get_weather,
-    "get_attraction": get_attraction
-}
+available_tools = {"get_weather": get_weather, "get_attraction": get_attraction}
 
 
 def main():
@@ -133,11 +129,13 @@ def main():
     client = OpenAICompatibleClient(
         model="deepseek-chat",
         api_key=os.getenv("OPENAI_API_KEY"),
-        base_url=os.getenv("OPENAI_API_BASE_URL")
+        base_url=os.getenv("OPENAI_API_BASE_URL"),
     )
 
-    user_prompt = "帮我查询今天广州的天气，根据今天的天气推荐几个合适的旅游景点，输出要详细"
-    prompt_history = [f'用户请求: {user_prompt}']
+    user_prompt = (
+        "帮我查询今天广州的天气，根据今天的天气推荐几个合适的旅游景点，输出要详细"
+    )
+    prompt_history = [f"用户请求: {user_prompt}"]
 
     print(f"用户输入: {user_prompt}\n" + "=" * 40)
 
@@ -148,8 +146,11 @@ def main():
         full_prompt = "\n".join(prompt_history)
         llm_output = client.generate(full_prompt, system_prompt=AGENT_SYSTEM_PROMPT)
         # 模型可能会输出多余的 Thought-Action,需要截断
-        match = re.search(r'(Thought:\s*.*?Action:\s*.*?)(?=\n\s*(?:Thought:|Action:|Observation:)|\Z)',
-                          llm_output, re.DOTALL)
+        match = re.search(
+            r"(Thought:\s*.*?Action:\s*.*?)(?=\n\s*(?:Thought:|Action:|Observation:)|\Z)",
+            llm_output,
+            re.DOTALL,
+        )
         if match:
             truncated = match.group(1).strip()
             if truncated != llm_output.strip():
@@ -166,7 +167,9 @@ def main():
         action_str = action_match.group(1).strip()
 
         if action_str.startswith("finish"):
-            final_answer = re.search(r'finish\(answer=["\'](.*)["\']\)', action_str).group(1)
+            final_answer = re.search(
+                r'finish\(answer=["\'](.*)["\']\)', action_str
+            ).group(1)
             print(f"最终答案: {final_answer}")
             break
 
@@ -181,8 +184,9 @@ def main():
             observation = f'错误：未定义工具 "{tool_name}"'
 
         observation_str = f"Observation: {observation}"
-        print(f'{observation_str}\n' + '=' * 80)
+        print(f"{observation_str}\n" + "=" * 80)
         prompt_history.append(observation_str)
 
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()

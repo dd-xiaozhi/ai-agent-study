@@ -4,7 +4,7 @@
 
 import random
 
-from LLMClient import LLMClient
+from llm_client import LLMClient
 
 class Dealer:
     """

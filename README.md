@@ -14,25 +14,25 @@
 
 ```
 ai-agent/
-├── QuickStart/                              # 快速入门
-│   └── QuickStart.py                        #   ReAct 旅行助手 Demo
+├── quick_start/                             # 快速入门
+│   └── quick_start.py                       #   ReAct 旅行助手 Demo
 │
-├── ConstructionOfClassicAgentParadigms/      # 经典 Agent 范式手写实现
-│   ├── LLMClient.py                         #   LLM 客户端基础封装
-│   ├── PlanAndSolveAgent.py                 #   Plan-and-Solve 范式
-│   ├── ReAct/                               #   ReAct 范式
-│   │   ├── ReActAgent.py                    #     ReAct Agent 骨架
-│   │   ├── SearchTool.py                    #     搜索工具（SerpApi）
-│   │   └── ToolExecutor.py                  #     工具注册与执行器
-│   └── Reflection/                          #   Reflection 反思范式
-│       ├── Memory.py                        #     轨迹记忆模块
-│       └── Reflection.py                    #     反思 Agent（代码迭代优化）
+├── construction_of_classic_agent_paradigms/ # 经典 Agent 范式手写实现
+│   ├── llm_client.py                        #   LLM 客户端基础封装
+│   ├── plan_and_solve_agent.py              #   Plan-and-Solve 范式
+│   ├── react/                               #   ReAct 范式
+│   │   ├── react_agent.py                   #     ReAct Agent 骨架
+│   │   ├── search_tool.py                   #     搜索工具（SerpApi）
+│   │   └── tool_executor.py                 #     工具注册与执行器
+│   └── reflection/                          #   Reflection 反思范式
+│       ├── memory.py                        #     轨迹记忆模块
+│       └── reflection.py                    #     反思 Agent（代码迭代优化）
 │
-├── framework-study/                         # 主流框架对比实战
-│   ├── AutoGen/                             #   AutoGen —— 多 Agent 软件开发团队
-│   ├── CAMEL/                               #   CAMEL  —— 角色扮演协作
-│   ├── LangGraph/                           #   LangGraph —— 状态图 ReAct Agent
-│   └── AgentScopeDemo/                      #   AgentScope —— 三国狼人杀游戏
+├── framework_study/                         # 主流框架对比实战
+│   ├── autogen/                             #   AutoGen —— 多 Agent 软件开发团队
+│   ├── camel/                               #   CAMEL  —— 角色扮演协作
+│   ├── langgraph/                           #   LangGraph —— 状态图 ReAct Agent
+│   └── agent_scope_demo/                    #   AgentScope —— 三国狼人杀游戏
 │
 ├── doc/                                     # 学习文档
 │   └── 二、agent 快速入门.md
@@ -43,7 +43,7 @@ ai-agent/
 
 ## 模块详解
 
-### 一、快速入门（QuickStart）
+### 一、快速入门（quick_start）
 
 一个最简 ReAct 旅行助手，输入城市名称，自动查天气 → 推荐景点。
 
@@ -67,15 +67,15 @@ flowchart LR
     style E fill:#EF5350,stroke:#C62828,stroke-width:2px,color:#fff
 ```
 
-### 二、经典 Agent 范式手写实现（ConstructionOfClassicAgentParadigms）
+### 二、经典 Agent 范式手写实现（construction_of_classic_agent_paradigms）
 
 不借助任何框架，纯手写三大经典范式：
 
 | 范式 | 核心思想 | 对应文件 |
 |------|---------|---------|
-| **ReAct** | 思考 → 行动 → 观察，循环推理 | `ReAct/` |
-| **Plan-and-Solve** | 先制定计划，再逐步执行 | `PlanAndSolveAgent.py` |
-| **Reflection** | 生成 → 反思 → 改进，迭代优化 | `Reflection/` |
+| **ReAct** | 思考 → 行动 → 观察，循环推理 | `react/` |
+| **Plan-and-Solve** | 先制定计划，再逐步执行 | `plan_and_solve_agent.py` |
+| **Reflection** | 生成 → 反思 → 改进，迭代优化 | `reflection/` |
 
 #### Plan-and-Solve 流程
 
@@ -112,7 +112,7 @@ flowchart TD
     style F fill:#26A69A,stroke:#00897B,stroke-width:2px,color:#fff
 ```
 
-### 三、主流框架对比实战（framework-study）
+### 三、主流框架对比实战（framework_study）
 
 | 框架 | 场景 | 亮点 |
 |------|------|------|
@@ -175,16 +175,16 @@ flowchart TB
 
 ```bash
 # AutoGen
-pip install -r framework-study/AutoGen/requirements.txt
+pip install -r framework_study/autogen/requirements.txt
 
 # CAMEL
-pip install -r framework-study/CAMEL/requirements.txt
+pip install -r framework_study/camel/requirements.txt
 
 # LangGraph
-pip install -r framework-study/LangGraph/requirements.txt
+pip install -r framework_study/langgraph/requirements.txt
 
 # AgentScope
-pip install -r framework-study/AgentScopeDemo/requirements.txt
+pip install -r framework_study/agent_scope_demo/requirements.txt
 ```
 
 ### 配置 API Key
@@ -195,28 +195,28 @@ export OPENAI_API_KEY="your-api-key"
 export OPENAI_API_BASE_URL="https://api.deepseek.com"
 ```
 
-或参考 `framework-study/AutoGen/.env.example` 创建 `.env` 文件。
+或参考 `framework_study/autogen/.env.example` 创建 `.env` 文件。
 
 ### 运行示例
 
 ```bash
 # 快速入门 - ReAct 旅行助手
-python QuickStart/QuickStart.py
+python quick_start/quick_start.py
 
 # Reflection Agent - 代码迭代优化
 python run_reflection.py
 
 # AutoGen - 多 Agent 协作
-python framework-study/AutoGen/main.py
+python framework_study/autogen/main.py
 
 # CAMEL - 角色扮演
-python framework-study/CAMEL/camel_demo.py
+python framework_study/camel/camel_demo.py
 
 # LangGraph - 状态图 Agent
-python framework-study/LangGraph/langgraph_demo.py
+python framework_study/langgraph/langgraph_demo.py
 
 # AgentScope - 三国狼人杀
-python framework-study/AgentScopeDemo/main.py
+python framework_study/agent_scope_demo/main.py
 ```
 
 ## 学习路线

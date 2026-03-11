@@ -1,5 +1,5 @@
 from typing import Any, Dict
-from SearchTool import search
+from search_tool import search
 
 
 class ToolExecutor:
